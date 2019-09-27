@@ -67,8 +67,8 @@ RUN git clone https://github.com/jemalloc/jemalloc.git \
 	&& make install \
 	&& cd /
 
-RUN cd / &&
-	git clone --branch stable-1.5 --single-branch https://github.com/efficios/babeltrace.git babeltrace \
+RUN cd / \
+	&& git clone --branch stable-1.5 --single-branch https://github.com/efficios/babeltrace.git babeltrace \
 	&& cd babeltrace \
 	&& ./bootstrap \
 	&& ./configure \
