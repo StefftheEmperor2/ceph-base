@@ -2,8 +2,8 @@ FROM alpine:3.10
 ENV NODE_VERSION 10.16.3
 RUN addgroup -g 1000 node \
 	&& adduser -u 1000 -G node -s /bin/sh -D node \
-	&& addgroup -g 1001 ceph \
-	&& adduser -u 1001 -G ceph -s /bin/sh -D ceph \
+	&& addgroup -g 1001 -S ceph \
+	&& adduser -u 1001 -G ceph -S -s /bin/sh -D ceph \
 	&& addgroup ceph abuild \
 	&& apk --update add busybox \
 		bash \
@@ -65,6 +65,7 @@ RUN git clone https://github.com/jemalloc/jemalloc.git \
 	&& ./autogen.sh \
 	&& make \
 	&& make install \
+	&& make clean \
 	&& cd /
 
 RUN cd / \
@@ -76,6 +77,7 @@ RUN cd / \
 		--disable-man-pages \
 	&& make \
 	&& make install \
+	&& make clean \
 	&& cd /	
 
 RUN cd / \
