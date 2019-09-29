@@ -34,7 +34,9 @@ RUN addgroup -g 1000 node \
 		libcap-ng \
 		gperf \
 		rabbitmq-c \
+		cunit \
 	&& echo 'export PS1="[\u@\h:\w] \`if [ \$? = 0 ]; then echo \[\e[33m\]:\)\[\e[0m\]; else echo \[\e[31m\]:\(\[\e[0m\]; fi\`\n\D{%Y-%m-%d %T} \\$ "' >> /etc/profile \
+	&& source /etc/profile
 	&& apk add --no-cache --virtual .build-deps \
 		binutils-gold \
 		curl \
@@ -59,7 +61,8 @@ RUN addgroup -g 1000 node \
 		libnl-dev \
 		libnl3-dev \
 		libcap-ng-dev \
-		rabbitmq-c-dev
+		rabbitmq-c-dev \
+		cunit-dev
 
 RUN git clone https://github.com/jemalloc/jemalloc.git \
 	&& cd jemalloc \
