@@ -36,7 +36,7 @@ RUN addgroup -g 1000 node \
 		rabbitmq-c \
 		cunit \
 	&& echo 'export PS1="[\u@\h:\w] \`if [ \$? = 0 ]; then echo \[\e[33m\]:\)\[\e[0m\]; else echo \[\e[31m\]:\(\[\e[0m\]; fi\`\n\D{%Y-%m-%d %T} \\$ "' >> /etc/profile \
-	&& source /etc/profile
+	&& source /etc/profile \
 	&& apk add --no-cache --virtual .build-deps \
 		binutils-gold \
 		curl \
