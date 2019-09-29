@@ -34,6 +34,7 @@ RUN addgroup -g 1000 node \
 		libcap-ng \
 		gperf \
 		rabbitmq-c \
+	&& echo 'export PS1="[\u@\h:\w] \`if [ \$? = 0 ]; then echo \[\e[33m\]:\)\[\e[0m\]; else echo \[\e[31m\]:\(\[\e[0m\]; fi\`\n\D{%Y-%m-%d %T} \\$ "' >> /etc/profile \
 	&& apk add --no-cache --virtual .build-deps \
 		binutils-gold \
 		curl \
