@@ -30,10 +30,19 @@ index 96037883f5..62a19aa3a2 100644
  	 	id_rsa_drop.ceph.com.pub
  	_pkg $_sysconfdir/ceph rbdmap
 diff --git a/make-dist b/make-dist
-index db62562402..7e31164541 100755
+index db62562402..3facccce0c 100755
 --- a/make-dist
 +++ b/make-dist
-@@ -124,6 +124,7 @@ for spec in ceph.spec.in alpine/APKBUILD.in; do
+@@ -11,6 +11,8 @@ outfile="ceph-$version"
+ 
+ echo "version $version"
+ 
++arch=$(abuild -A)
++
+ # update submodules
+ echo "updating submodules..."
+ force=$(if git submodule usage 2>&1 | grep --quiet 'update.*--force'; then echo --force ; fi)
+@@ -124,6 +126,7 @@ for spec in ceph.spec.in alpine/APKBUILD.in; do
      cat $spec |
          sed "s/@VERSION@/$rpm_version/g" |
          sed "s/@RPM_RELEASE@/$rpm_release/g" |
