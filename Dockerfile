@@ -2,8 +2,8 @@ FROM alpine:3.10
 ENV NODE_VERSION 10.16.3
 RUN addgroup -g 1000 node \
 	&& adduser -u 1000 -G node -s /bin/sh -D node \
-	&& addgroup -g 1001 -S ceph \
-	&& adduser -u 1001 -G ceph -S -s /bin/sh -D ceph \
+	&& addgroup -g 167 -S ceph \
+	&& adduser -u 167 -G ceph -S -s /bin/sh -D ceph \
 	&& addgroup ceph abuild \
 	&& apk --update add busybox \
 		bash \
@@ -132,11 +132,11 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 	&& rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz 
 
 RUN cd / \
-	&& git clone --single-branch https://github.com/ceph/ceph
+	&& git clone --single-branch --branch=nautilus https://github.com/ceph/ceph
 COPY APKBUILD.in.patch /ceph
 RUN chown -R ceph:ceph ceph \
 	&& cd ceph \
-	&& patch -p1 < APKBUILD.in.patch \
+	&& su ceph - -c "patch -p1 < APKBUILD.in.patch" \
 	&& su ceph - -c ./make-apk.sh \
 	&& apk del .build-deps \
 	&& apk del .build-deps-yarn
