@@ -140,6 +140,15 @@ COPY APKBUILD.in.patch /ceph
 RUN chown -R ceph:ceph ceph \
 	&& cd ceph \
 	&& su ceph - -c "patch -p1 < APKBUILD.in.patch" \
-	&& su ceph - -c ./make-apk.sh \
+	&& su ceph - -c "./make-dist" \
+	&& su ceph - -c "patch -p1 src/spdk/dpdk/lib/librte_eal/linuxapp/eal/eal_hugepage_info.c < eal_hugepage_info.c.patch" \
+	&& su ceph - -c "mv -f *.tar.bz2 ./alpine \
+		&& rm -rf .abuild \
+		&& mkdir -p .abuild \
+		&& ABUILD_USERDIR=$(pwd)/.abuild abuild-keygen -n -a \
+		&& source .abuild/abuild.conf \
+		&& cd alpine \
+		&& abuild checksum && JOBS=$(expr $(nproc) / 2) SRCDEST=$(pwd) REPODEST=$(pwd) PACKAGER_PRIVKEY=$PACKAGER_PRIVKEY abuild -r \
+		&& cd .. " \
 	&& apk del .build-deps \
 	&& apk del .build-deps-yarn

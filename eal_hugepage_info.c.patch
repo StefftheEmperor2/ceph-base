@@ -1,0 +1,11 @@
+--- src/spdk/dpdk/lib/librte_eal/linuxapp/eal/eal_hugepage_info.c.orig	2019-09-30 08:46:48.202800433 +0000
++++ src/spdk/dpdk/lib/librte_eal/linuxapp/eal/eal_hugepage_info.c	2019-09-30 08:49:00.833966316 +0000
+@@ -17,6 +17,7 @@
+ #include <sys/mman.h>
+ #include <sys/queue.h>
+ #include <sys/stat.h>
++#include <fcntl.h>
+ 
+ #include <linux/mman.h> /* for hugetlb-related flags */
+ 
+
