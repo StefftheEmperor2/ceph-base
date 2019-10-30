@@ -62,7 +62,8 @@ RUN addgroup -g 1000 node \
 		libnl3-dev \
 		libcap-ng-dev \
 		rabbitmq-c-dev \
-		cunit-dev
+		cunit-dev \
+		boost-dev
 
 RUN git clone https://github.com/jemalloc/jemalloc.git \
 	&& cd jemalloc \
@@ -135,20 +136,18 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 	&& rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz 
 
 RUN cd / \
-	&& git clone --single-branch --branch=nautilus https://github.com/ceph/ceph
-COPY APKBUILD.in.patch /ceph
-RUN chown -R ceph:ceph ceph \
-	&& cd ceph \
-	&& su ceph - -c "patch -p1 < APKBUILD.in.patch" \
-	&& su ceph - -c "./make-dist" \
-	&& su ceph - -c "patch -p1 src/spdk/dpdk/lib/librte_eal/linuxapp/eal/eal_hugepage_info.c < eal_hugepage_info.c.patch" \
-	&& su ceph - -c "mv -f *.tar.bz2 ./alpine \
-		&& rm -rf .abuild \
-		&& mkdir -p .abuild \
-		&& ABUILD_USERDIR=$(pwd)/.abuild abuild-keygen -n -a \
-		&& source .abuild/abuild.conf \
-		&& cd alpine \
-		&& abuild checksum && JOBS=$(expr $(nproc) / 2) SRCDEST=$(pwd) REPODEST=$(pwd) PACKAGER_PRIVKEY=$PACKAGER_PRIVKEY abuild -r \
-		&& cd .. " \
-	&& apk del .build-deps \
-	&& apk del .build-deps-yarn
+	&& git clone --single-branch --branch=luminous https://github.com/ceph/ceph
+COPY APKBUILD.in.patch.luminous /ceph
+RUN chown -R ceph:ceph ceph
+USER 167:167
+WORKDIR /ceph
+RUN cd /ceph \
+	&& patch -p1 < APKBUILD.in.patch.luminous \
+	&& ./make-dist 
+COPY make-myapk.luminous /ceph
+USER root
+RUN cd /ceph \
+	&& su ceph - -c ./make-myapk.luminous \
+	&& cd ..  #\
+#	&& apk del .build-deps \
+#	&& apk del .build-deps-yarn

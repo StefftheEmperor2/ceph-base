@@ -1,0 +1,70 @@
+# Contributor: Stefan Bischoff <stefan.bischoff@lw-rulez.de>
+# Maintainer: Stefan Bischoff <stefan.bischoff@lw-rulez.de>
+pkgname=gflags
+pkgver=@VERSION@
+pkgrel=@RPM_RELEASE@
+pkgdesc="The gflags package contains a C++ library that implements commandline flags processing"
+pkgusers="ceph"
+pkggroups="ceph"
+url="https://gflags.github.io"
+arch="@ARCH@"
+license="MIT"
+options="!check"
+# grep --quiet option required
+# util-linux uuidgen required
+
+source="@TARBALL_BASENAME@.tar.bz2"
+subpackages="
+	$pkgname-dev:gflags_dev
+	lib$pkgname:gflags_libs
+"
+_ceph_uid=167
+_ceph_gid=167
+
+_prefix=/usr
+_includedir=$_prefix/include
+_libdir=$_prefix/lib
+
+builddir="$srcdir/@TARBALL_BASENAME@"
+
+build() {
+	mkdir -p $builddir/build
+	cd $builddir/build
+
+	cmake .. \
+		-DBUILD_SHARED_LIBS=1 \
+		-DGFLAGS_INSTALL_SHARED_LIBS=1 \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		|| return 1
+
+	make -j${JOBS:-2} || return 1
+
+}
+
+package() {
+	cd $builddir/build
+	make DESTDIR=$pkgdir install || return 1
+	cd ..
+}
+
+gflags_dev()
+{
+	_pkg $_includedir gflags
+}
+
+gflags_libs()
+{
+	_pkg $_libdir libgflags*
+}
+
+_pkg()
+{
+	local path=$1
+	shift
+	local files=$@
+	mkdir -p $subpkgdir$path || exit 1
+	for _file in $files; do
+		mv $pkgdir$path/$_file $subpkgdir$path || exit 1
+	done
+}
+

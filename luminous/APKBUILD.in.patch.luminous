@@ -1,0 +1,43 @@
+diff --git a/alpine/APKBUILD.in b/alpine/APKBUILD.in
+index e987a1e007..2e8c678096 100644
+--- a/alpine/APKBUILD.in
++++ b/alpine/APKBUILD.in
+@@ -7,7 +7,7 @@ pkgdesc="Ceph is a distributed object store and file system"
+ pkgusers="ceph"
+ pkggroups="ceph"
+ url="http://ceph.com"
+-arch="x86_64"
++arch="@ARCH@"
+ license="LGPL-2.1 and CC-BY-SA-1.0 and GPL-2.0 and BSL-1.0 and \
+ GPL-2.0-with-autoconf-exception and BSD-3-Clause and MIT"
+ depends="ceph-osd ceph-mds ceph-mgr	ceph-mon"
+diff --git a/make-dist b/make-dist
+index 11224cb5f1..2f752d4cd1 100755
+--- a/make-dist
++++ b/make-dist
+@@ -11,6 +11,8 @@ outfile="ceph-$version"
+ 
+ echo "version $version"
+ 
++arch=$(abuild -A)
++
+ # update submodules
+ echo "updating submodules..."
+ force=$(if git submodule usage 2>&1 | grep --quiet 'update.*--force'; then echo --force ; fi)
+@@ -36,7 +38,7 @@ download_boost() {
+             exit
+         fi
+         url=$url_base/$boost_fname
+-        wget -c --no-verbose -O $boost_fname $url
++        wget --no-verbose -O $boost_fname $url
+         if [ $? != 0 -o ! -e $boost_fname ]; then
+             echo "Download of $url failed"
+         elif [ $(md5sum $boost_fname | awk '{print $1}') != $boost_md5 ]; then
+@@ -94,6 +96,7 @@ for spec in ceph.spec.in alpine/APKBUILD.in; do
+     cat $spec |
+         sed "s/@VERSION@/$rpm_version/g" |
+         sed "s/@RPM_RELEASE@/$rpm_release/g" |
++        sed "s/@ARCH@/$arch/g" |
+         sed "s/@TARBALL_BASENAME@/ceph-$version/g" > `echo $spec | sed 's/.in$//'`
+ done
+ ln -s . $outfile
