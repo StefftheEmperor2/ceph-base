@@ -248,7 +248,7 @@ mgr() {
 	depends="ceph-base libceph"
 
 	_pkg $_bindir ceph-mgr
-	_pkg $_libdir/ceph mgr
+	_pkg $_datadir/ceph mgr
 
 	install -m 750 -o $_ceph_uid -g $_ceph_gid -d \
 		$subpkgdir$_localstatedir/lib/ceph/mgr
