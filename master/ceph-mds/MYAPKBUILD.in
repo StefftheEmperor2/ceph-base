@@ -11,7 +11,7 @@ arch="@ARCH@"
 license="LGPL-2.1 and CC-BY-SA-1.0 and GPL-2.0 and BSL-1.0 and \
 GPL-2.0-with-autoconf-exception and BSD-3-Clause and MIT"
 options="!check"
-depends="rocksdb librocksdb ceph-osd ceph-mon libceph"
+depends="rocksdb librocksdb ceph-osd ceph-mon ceph-mds libceph"
 # grep --quiet option required
 # diffutils -y option required by osd-scrub-snaps.sh
 # util-linux uuidgen required
@@ -73,10 +73,11 @@ subpackages="
 	$pkgname-base
 	$pkgname-common
 	$pkgname-mon
+	$pkgname-mds
 	$pkgname-fuse:ceph_fuse
 	$pkgname-osd
-	$pkgname-volume:ceph_volume
 	lib$pkgname:ceph_libs
+	$pkgname-volume:ceph_volume
 	librados
 	librados-dev:librados_dev
 	py-ceph:py_ceph
@@ -232,6 +233,7 @@ ceph_libs()
 	_pkg $_libdir/ceph/crypto libceph_*.so*
 	_pkg $_libdir/ceph libceph-common.so*
 }
+
 mon() {
 	pkgdesc="Cluster monitor daemon for the Ceph distributed file system."
 	depends="ceph-base libceph"
@@ -239,6 +241,15 @@ mon() {
 	_pkg $_bindir ceph-mon
 	install -m 750 -o $_ceph_uid -g $_ceph_gid -d \
 		$subpkgdir$_localstatedir/lib/ceph/mon
+}
+
+mds() {
+	pkgdesc="Metadata server daemon for the Ceph distributed file system."
+	depends="ceph-base libceph"
+
+	_pkg $_bindir ceph-mds
+	install -m 750 -o $_ceph_uid -g $_ceph_gid -d \
+		$subpkgdir$_localstatedir/lib/ceph/mds
 }
 
 ceph_fuse() {

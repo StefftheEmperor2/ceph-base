@@ -1,0 +1,107 @@
+#!/bin/sh -e
+
+set -C # noclobber
+
+# TRAP SIGNALS
+trap 'cleanup' QUIT EXIT
+
+# For security reasons, explicitly set the internal field separator
+# to newline, space, tab
+OLD_IFS=$IFS
+IFS='
+ 	'
+
+
+function cleanup () {
+    rm -rf $TMPDIR
+    IFS="$OLD_IFS"
+}
+
+if [ ! -d .git ]; then
+    echo "no .git present.  run this from the base dir of the git checkout."
+    exit 1
+fi
+
+version=$1
+[ -z "$version" ] && version=`git describe --match 'v*' | sed 's/^v//'`
+outfile="rocksdb-$version"
+
+echo "version $version"
+
+arch=$(abuild -A)
+
+# clean out old cruft...
+echo "cleanup..."
+rm -f $outfile*
+
+readonly PROGRAM=`basename "$0"`
+readonly VERSION=0.2
+
+OLD_PWD="`pwd`"
+TMPDIR=`mktemp -d "${TMPDIR:-/tmp}/$PROGRAM.XXXXXX"`
+TMPFILE=`mktemp "$TMPDIR/$PROGRAM.XXXXXX"` # Create a place to store our work's progress
+TOARCHIVE=`mktemp "$TMPDIR/$PROGRAM.toarchive.XXXXXX"`
+OUT_FILE=$outfile.tar # assume "this directory" without a name change by default
+SEPARATE=0
+VERBOSE=0
+
+TARCMD=tar
+[[ $(uname) == "Darwin" ]] && TARCMD=gnutar
+FORMAT=tar
+PREFIX=rocksdb-$version/
+TREEISH=HEAD
+IGNORE=
+
+git archive --format=$FORMAT --prefix="$PREFIX" $TREEISH > $TMPDIR/$(basename "$(pwd)").$FORMAT
+
+echo $TMPDIR/$(basename "$(pwd)").$FORMAT >| $TMPFILE # clobber on purpose
+superfile=`head -n 1 $TMPFILE`
+while read file; do
+	echo "Move $file to $OUT_FILE"
+	mv "$file" "$OUT_FILE"
+done < $TMPFILE
+
+echo "created $OUT_FILE"
+echo -n "including src/.git_version"
+
+mkdir -p src
+(git rev-parse HEAD ; git describe) 2> /dev/null > src/.git_version
+
+echo " done"
+
+# if the version has '-' in it, it has a 'release' part,
+# like vX.Y.Z-N-g<shortsha1>.  If it doesn't, it's just
+# vX.Y.Z.  Handle both, and translate - to . for rpm
+# naming rules (the - separates version and release).
+
+if expr index $version '-' > /dev/null; then
+	rpm_version=`echo $version | cut -d - -f 1-1`
+	rpm_release=`echo $version | cut -d - -f 2- | sed 's/-/./'`
+else
+	rpm_version=$version
+	rpm_release=0
+fi
+
+for spec in alpine/APKBUILD.in; do
+	cat $spec |
+		sed "s/@VERSION@/$rpm_version/g" |
+		sed "s/@RPM_RELEASE@/$rpm_release/g" |
+		sed "s/@ARCH@/$arch/g" |
+		sed "s/@TARBALL_BASENAME@/rocksdb-$version/g" > `echo $spec | sed 's/.in$//'`
+done
+ln -s . $outfile
+echo "tar $outfile.version.tar"
+tar cvf $outfile.version.tar $outfile/src/.git_version $outfile/alpine/APKBUILD
+echo "concat $outfile.version.tar to $outfile.all.tar"
+tar --concatenate -f $outfile.all.tar $outfile.version.tar
+echo "concat $outfile.tar to $outfile.all.tar"
+tar --concatenate -f $outfile.all.tar $outfile.tar
+mv $outfile.all.tar $outfile.tar
+rm $outfile
+rm -f $outfile.version.tar
+
+echo "compressing..."
+bzip2 -9 $outfile.tar
+
+echo "done."
+

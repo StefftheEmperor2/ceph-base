@@ -1,0 +1,80 @@
+# Contributor: Stefan Bischoff <stefan.bischoff@lw-rulez.de>
+# Maintainer: Stefan Bischoff <stefan.bischoff@lw-rulez.de>
+pkgname=rocksdb
+pkgver=@VERSION@
+pkgrel=@RPM_RELEASE@
+pkgdesc="RocksDB is an embeddable persistent key-value store for fast storage"
+pkgusers="ceph"
+pkggroups="ceph"
+url="https://rocksdb.org/"
+arch="@ARCH@"
+license="GPLv2 and Apache 2.0"
+options="!check"
+# grep --quiet option required
+# util-linux uuidgen required
+makedepends="gflags libgflags gflags-dev"
+source="@TARBALL_BASENAME@.tar.bz2"
+subpackages="
+	$pkgname-dev:rocksdb_dev
+	lib$pkgname:rocksdb_libs
+"
+_ceph_uid=167
+_ceph_gid=167
+
+_prefix=/usr
+_includedir=$_prefix/include
+_libdir=$_prefix/lib
+
+builddir=$srcdir/@TARBALL_BASENAME@
+
+build() {
+	mkdir -p $builddir/build
+	cd $builddir/build
+
+	cmake .. \
+		-DWITH_SNAPPY=ON \
+		-DWITH_LZ4=ON \
+		-DWITH_ZLIB=ON \
+		-DWITH_ZSTD=ON \
+		-DWITH_GFLAGS=ON \
+		-DWITH_BZ2=ON \
+		-DWITH_TESTS=OFF \
+		-DWITH_RUNTIME_DEBUG=OFF \
+		-DWITH_TOOLS=OFF \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		|| return 1
+
+	make -j${JOBS:-2} || return 1
+
+}
+
+package() {
+	cd $builddir/build
+	make DESTDIR=$pkgdir install || return 1
+	cd ..
+}
+
+rocksdb_dev()
+{
+	_pkg $_includedir rocksdb
+}
+
+
+rocksdb_libs()
+{
+	_pkg $_libdir librocksdb.so*
+	_pkg $_libdir librocksdb.a	
+}
+_pkg()
+{
+	local path=$1
+	shift
+	local files=$@
+	mkdir -p $subpkgdir$path || exit 1
+	for _file in $files; do
+		echo "added  $pkgdir$path/$_file to $subpkgdir$path"
+		mv $pkgdir$path/$_file $subpkgdir$path || exit 1
+	done
+}
+

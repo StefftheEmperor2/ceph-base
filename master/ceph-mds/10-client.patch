@@ -1,0 +1,17 @@
+--- a/src/client/Client.cc	2019-10-22 18:15:52.701950281 +0200
++++ b/src/client/Client.cc	2019-10-24 17:55:44.088186472 +0200
+@@ -124,6 +124,14 @@
+ 
+ #define DEBUG_GETATTR_CAPS (CEPH_CAP_XATTR_SHARED)
+ 
++#ifndef SEEK_DATA
++# define SEEK_DATA	3	/* Seek to next data.  */
++#endif
++
++#ifndef SEEK_HOLE
++# define SEEK_HOLE	4	/* Seek to next hole.  */
++#endif
++
+ void client_flush_set_callback(void *p, ObjectCacher::ObjectSet *oset)
+ {
+   Client *client = static_cast<Client*>(p);
