@@ -1,0 +1,11 @@
+--- a/src/os/bluestore/BlueStore.cc	2019-11-05 13:57:30.544859134 +0100
++++ b/src/os/bluestore/BlueStore.cc	2019-11-05 14:02:05.627909559 +0100
+@@ -5810,7 +5810,7 @@ size_t BlueStore::available_freespace(ui
+     if (dist_to_alignment >= len)
+       return;
+     len -= dist_to_alignment;
+-    total += p2align(len, alloc_size);
++    total += p2align<uint64_t>(len, alloc_size);
+   };
+   alloc->dump(iterated_allocation);
+   return total;

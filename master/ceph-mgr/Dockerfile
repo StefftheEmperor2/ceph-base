@@ -187,7 +187,7 @@ COPY make-myapk /ceph/local
 COPY make-mydist /ceph/local
 COPY 10-client.patch /ceph/local/alpine
 COPY 20-indirect_intrusive_heap.patch /ceph/local/alpine
-COPY 30-compat.patch /ceph/local/alpine
+COPY 40-bluestore.patch /ceph/local/alpine
 
 RUN chmod u+x /ceph/local/make-myapk \
 	&& chmod u+x /ceph/local/make-mydist
@@ -201,4 +201,6 @@ RUN cd /ceph/local \
 USER root
 RUN rm alpine/ceph-common.pre-install
 RUN su ceph - -c ./make-myapk \
-	&& cd ..  #\
+	&& cd ../..  \
+	&& rm -rf /ceph
+WORKDIR /
