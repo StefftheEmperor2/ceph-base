@@ -68,7 +68,7 @@ makedepends="
 	librocksdb
 	rocksdb-dev
 "
-source="@TARBALL_BASENAME@.tar.bz2 10-client.patch 20-indirect_intrusive_heap.patch 40-bluestore.patch"
+source="@TARBALL_BASENAME@.tar.bz2 10-client.patch 20-indirect_intrusive_heap.patch 40-bluestore.patch 50-rados.patch"
 subpackages="
 	$pkgname-base
 	$pkgname-common
