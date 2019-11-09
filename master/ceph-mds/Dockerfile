@@ -172,3 +172,4 @@ RUN su ceph - -c ./make-myapk \
 	&& cd ../..  \
 	&& rm -rf /ceph
 WORKDIR /
+RUN apk add ceph

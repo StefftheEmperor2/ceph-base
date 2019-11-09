@@ -110,7 +110,6 @@ builddir=$srcdir/@TARBALL_BASENAME@
 
 build() {
 	export CEPH_BUILD_VIRTUALENV=$builddir
-
 	mkdir -p $builddir/build
 	cd $builddir/build
 
@@ -152,6 +151,8 @@ build() {
 		-DWITH_TESTS=OFF \
 		-DWITH_BOOST_CONTEXT=OFF \
 		-DWITH_SYSTEM_ROCKSDB=ON \
+		-DWITH_MGR_DASHBOARD_FRONTEND=OFF \
+		-DWITH_SYSTEM_NPM=ON \
 		|| return 1
 	make -j${JOBS:-2} || return 1
 
