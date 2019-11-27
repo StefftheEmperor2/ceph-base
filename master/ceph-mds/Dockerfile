@@ -151,6 +151,7 @@ RUN addgroup -g 1000 node \
 	&& cp /tmp/ceph/20-indirect_intrusive_heap.patch /ceph/local/alpine \
 	&& cp /tmp/ceph/40-bluestore.patch /ceph/local/alpine \
 	&& cp /tmp/ceph/50-rados.patch /ceph/local/alpine \
+	&& rm -rf /tmp/ceph \
 	&& chmod u+x /ceph/local/make-apk \
 	&& chmod u+x /ceph/local/make-dist \
 	&& chown -R ceph:ceph /ceph/local \

@@ -1,6 +1,0 @@
-rm -rf .build
-mkdir -p .build
-cd .build
-cmake -DWITH_SNAPPY=ON -DWITH_LZ4=ON -DWITH_ZLIB=ON -DWITH_ZSTD=ON -DWITH_GFLAGS=ON -DWITH_BZ2=ON -DWITH_TESTS=OFF -DWITH_RUNTIME_DEBUG=OFF -DWITH_TOOLS=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib --parallel $(expr $(nproc) / 2) .. 
-make install
-cd ..
