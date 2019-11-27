@@ -11,7 +11,7 @@ arch="@ARCH@"
 license="LGPL-2.1 and CC-BY-SA-1.0 and GPL-2.0 and BSL-1.0 and \
 GPL-2.0-with-autoconf-exception and BSD-3-Clause and MIT"
 options="!check"
-depends="rocksdb librocksdb ceph-osd ceph-mon libceph"
+depends="rocksdb librocksdb ceph-osd ceph-mon ceph-volume libceph py-rados lvm2 eudev"
 # grep --quiet option required
 # diffutils -y option required by osd-scrub-snaps.sh
 # util-linux uuidgen required
@@ -187,6 +187,7 @@ base() {
 		logrotate
 		py-requests
 		py-setuptools
+		py-prettytable
 		util-linux
 		xfsprogs
 	"

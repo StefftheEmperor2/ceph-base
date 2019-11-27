@@ -1,5 +1,26 @@
 FROM alpine:3.10.3
 
+RUN mkdir -p /tmp/gflags \
+	&& mkdir -p /tmp/rocksdb \
+	&& mkdir -p /tmp/ceph
+
+
+COPY gflags/APKBUILD.in /tmp/gflags
+COPY gflags/make-apk /tmp/gflags
+COPY gflags/make-dist /tmp/gflags
+
+COPY rocksdb/APKBUILD.in /tmp/rocksdb
+COPY rocksdb/make-apk /tmp/rocksdb
+COPY rocksdb/make-dist /tmp/rocksdb
+
+COPY ceph/APKBUILD.in /tmp/ceph
+COPY ceph/make-apk /tmp/ceph
+COPY ceph/make-dist /tmp/ceph
+COPY ceph/10-client.patch /tmp/ceph
+COPY ceph/20-indirect_intrusive_heap.patch /tmp/ceph
+COPY ceph/40-bluestore.patch /tmp/ceph
+COPY ceph/50-rados.patch /tmp/ceph
+
 RUN addgroup -g 1000 node \
 	&& adduser -u 1000 -G node -s /bin/sh -D node \
 	&& addgroup -g 167 -S ceph \
@@ -77,9 +98,8 @@ RUN addgroup -g 1000 node \
 		openssl-dev \
 		lz4-dev \ 
 		zstd-dev \
-		boost-dev
-
-RUN mkdir -p /abuild \
+		boost-dev \
+	&& mkdir -p /abuild \
 	&& cd /abuild \
 	&& openssl genrsa -out abuild.rsa 2048 \
 	&& chgrp abuild abuild.rsa \
@@ -91,85 +111,56 @@ RUN mkdir -p /abuild \
 	&& abuild-sign -k /abuild/abuild.rsa /localrepo/local/$(abuild -A)/APKINDEX.tar.gz \
 	&& chgrp -R abuild /localrepo \
 	&& chmod -R g+rw /localrepo \
-	&& echo "/localrepo/local" >> /etc/apk/repositories
-	
-
-COPY install-apk /usr/bin
-RUN chmod o+x /usr/bin/install-apk
-
-RUN git clone --branch=master --single-branch https://github.com/gflags/gflags.git /gflags/local \
+	&& echo "/localrepo/local" >> /etc/apk/repositories \
+	&& git clone --branch=master --single-branch https://github.com/gflags/gflags.git /gflags/local \
 	&& mkdir -p /gflags/local/alpine \
 	&& chmod o+w /usr/include \
-	&& chmod o+w /usr/lib
-
-COPY gflags/APKBUILD.in /gflags/local/alpine
-COPY gflags/make-apk /gflags/local
-COPY gflags/make-dist /gflags/local
-
-RUN chmod u+x /gflags/local/make-apk \
-	&& chmod u+x /gflags/local/make-dist
-
-RUN chown -R ceph:ceph /gflags/local
-USER 167:167
-WORKDIR /gflags/local 
-RUN cd /gflags/local \
-	&& ./make-dist
-
-USER root
-
-RUN su ceph - -c ./make-apk
-
-RUN apk add gflags \
-	&& rm -rf /gflags
-
-RUN cd / \
+	&& chmod o+w /usr/lib \
+	&& mv /tmp/gflags/APKBUILD.in /gflags/local/alpine \
+	&& mv /tmp/gflags/make-apk /gflags/local \
+	&& mv /tmp/gflags/make-dist /gflags/local \
+	&& rm -rf /tmp/gflags \
+	&& chmod u+x /gflags/local/make-apk \
+	&& chmod u+x /gflags/local/make-dist \
+	&& chown -R ceph:ceph /gflags/local \
+	&& cd /gflags/local \
+	&& su ceph - -c ./make-dist \
+	&& su ceph - -c ./make-apk \
+	&& apk add gflags \
+	&& rm -rf /gflags \
+	&& cd / \
 	&& git clone --single-branch --branch=master https://github.com/facebook/rocksdb.git /rocksdb/local \
-	&& mkdir -p /rocksdb/local/alpine
-
-COPY rocksdb/APKBUILD.in /rocksdb/local/alpine
-COPY rocksdb/make-apk /rocksdb/local
-COPY rocksdb/make-dist /rocksdb/local
-	
-RUN chmod u+x /rocksdb/local/make-apk \
-	&& chmod u+x /rocksdb/local/make-dist
-
-RUN chown -R ceph:ceph /rocksdb/local
-USER 167:167
-WORKDIR /rocksdb/local
-RUN cd /rocksdb/local \
-	&& ./make-dist
-
-USER root
-
-RUN su ceph - -c ./make-apk
-
-RUN apk add rocksdb \
-	&& rm -rf /rocksdb
-
-RUN cd / \
-	&& git clone --single-branch --branch=master https://github.com/ceph/ceph /ceph/local
-
-COPY MYAPKBUILD.in /ceph/local/alpine
-COPY make-myapk /ceph/local
-COPY make-mydist /ceph/local
-COPY 10-client.patch /ceph/local/alpine
-COPY 20-indirect_intrusive_heap.patch /ceph/local/alpine
-COPY 40-bluestore.patch /ceph/local/alpine
-COPY 50-rados.patch /ceph/local/alpine
-
-RUN chmod u+x /ceph/local/make-myapk \
-	&& chmod u+x /ceph/local/make-mydist
-
-RUN chown -R ceph:ceph /ceph/local
-USER 167:167
-WORKDIR /ceph/local
-RUN cd /ceph/local \
-	&& ./make-mydist \
-	&& cp alpine/MYAPKBUILD alpine/APKBUILD
-USER root
-RUN rm alpine/ceph-common.pre-install
-RUN su ceph - -c ./make-myapk \
+	&& mkdir -p /rocksdb/local/alpine \
+	&& cp /tmp/rocksdb/APKBUILD.in /rocksdb/local/alpine \
+	&& cp /tmp/rocksdb/make-apk /rocksdb/local \
+	&& cp /tmp/rocksdb/make-dist /rocksdb/local \
+	&& rm -rf /tmp/rocksdb \
+	&& chmod u+x /rocksdb/local/make-apk \
+	&& chmod u+x /rocksdb/local/make-dist \
+	&& chown -R ceph:ceph /rocksdb/local \
+	&& cd /rocksdb/local \
+	&& su ceph - -c ./make-dist \
+	&& su ceph - -c ./make-apk \
+	&& apk add rocksdb \
+	&& rm -rf /rocksdb \
+	&& cd / \
+	&& git clone --single-branch --branch=master https://github.com/ceph/ceph /ceph/local \
+	&& cp /tmp/ceph/APKBUILD.in /ceph/local/alpine \
+	&& cp /tmp/ceph/make-apk /ceph/local \
+	&& cp /tmp/ceph/make-dist /ceph/local \
+	&& cp /tmp/ceph/10-client.patch /ceph/local/alpine \
+	&& cp /tmp/ceph/20-indirect_intrusive_heap.patch /ceph/local/alpine \
+	&& cp /tmp/ceph/40-bluestore.patch /ceph/local/alpine \
+	&& cp /tmp/ceph/50-rados.patch /ceph/local/alpine \
+	&& rm -rf /tmp/ceph \
+	&& chmod u+x /ceph/local/make-apk \
+	&& chmod u+x /ceph/local/make-dist \
+	&& chown -R ceph:ceph /ceph/local \
+	&& cd /ceph/local \
+	&& su ceph - -c ./make-dist \
+	&& su ceph - -c ./make-apk \
 	&& cd ../..  \
-	&& rm -rf /ceph
-WORKDIR /
-RUN apk add ceph
+	&& rm -rf /ceph \
+	&& cd / \
+	&& apk add ceph \
+	&& apk del .build-deps
