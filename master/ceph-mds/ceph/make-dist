@@ -51,7 +51,7 @@ else
 	rpm_release=0
 fi
 
-for spec in ceph.spec.in alpine/MYAPKBUILD.in; do
+for spec in ceph.spec.in alpine/APKBUILD.in; do
     cat $spec |
         sed "s/@VERSION@/$rpm_version/g" |
         sed "s/@RPM_RELEASE@/$rpm_release/g" |
@@ -59,7 +59,7 @@ for spec in ceph.spec.in alpine/MYAPKBUILD.in; do
         sed "s/@TARBALL_BASENAME@/ceph-$version/g" > `echo $spec | sed 's/.in$//'`
 done
 ln -s . $outfile
-tar cvf $outfile.version.tar $outfile/src/.git_version $outfile/ceph.spec $outfile/alpine/MYAPKBUILD
+tar cvf $outfile.version.tar $outfile/src/.git_version $outfile/ceph.spec $outfile/alpine/APKBUILD
 tar --concatenate -f $outfile.all.tar $outfile.version.tar
 tar --concatenate -f $outfile.all.tar $outfile.tar
 mv $outfile.all.tar $outfile.tar

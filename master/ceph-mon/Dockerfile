@@ -159,8 +159,7 @@ RUN addgroup -g 1000 node \
 	&& cd /ceph/local \
 	&& su ceph - -c ./make-dist \
 	&& su ceph - -c ./make-apk \
-	&& cd ../..  \
-	&& rm -rf /ceph \
 	&& cd / \
+	&& rm -rf /ceph \
 	&& apk add ceph \
 	&& apk del .build-deps
