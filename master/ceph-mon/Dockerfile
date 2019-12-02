@@ -26,6 +26,7 @@ RUN addgroup -g 1000 node \
 	&& addgroup -g 167 -S ceph \
 	&& adduser -u 167 -G ceph -S -s /bin/sh -D ceph \
 	&& addgroup ceph abuild \
+	&& addgroup ceph disk \
 	&& apk --update add busybox \
 		bash \
 		coreutils \
