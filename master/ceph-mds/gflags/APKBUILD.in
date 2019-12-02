@@ -13,6 +13,7 @@ options="!check"
 # grep --quiet option required
 # util-linux uuidgen required
 
+makedepends="cmake"
 source="@TARBALL_BASENAME@.tar.bz2"
 subpackages="
 	$pkgname-dev:gflags_dev

@@ -2,8 +2,12 @@ FROM alpine:3.10.3
 
 RUN mkdir -p /tmp/gflags \
 	&& mkdir -p /tmp/rocksdb \
-	&& mkdir -p /tmp/ceph
+	&& mkdir -p /tmp/ceph \
+	&& mkdir -p /tmp/cmake
 
+COPY cmake/APKBUILD.in /tmp/cmake
+COPY cmake/make-apk /tmp/cmake
+COPY cmake/make-dist /tmp/cmake
 
 COPY gflags/APKBUILD.in /tmp/gflags
 COPY gflags/make-apk /tmp/gflags
@@ -74,7 +78,6 @@ RUN addgroup -g 1000 node \
 		libgcc \
 		linux-headers \
 		make \
-		cmake \
 		py3-gflags \
 		python \
 		lz4-dev \
@@ -113,6 +116,20 @@ RUN addgroup -g 1000 node \
 	&& chgrp -R abuild /localrepo \
 	&& chmod -R g+rw /localrepo \
 	&& echo "/localrepo/local" >> /etc/apk/repositories \
+	&& cd / \
+	&& git clone --single-branch --branch=master https://gitlab.kitware.com/cmake/cmake.git /cmake/local \
+	&& mkdir -p /cmake/local/alpine \
+	&& cp /tmp/cmake/APKBUILD.in /cmake/local/alpine \
+	&& cp /tmp/cmake/make-apk /cmake/local \
+	&& cp /tmp/cmake/make-dist /cmake/local \
+	&& rm -rf /tmp/cmake \
+	&& chmod u+x /cmake/local/make-apk \
+	&& chmod u+x /cmake/local/make-dist \
+	&& chown -R ceph:ceph /cmake/local \
+	&& cd /cmake/local \
+	&& su ceph - -c ./make-dist \
+	&& su ceph - -c ./make-apk \
+	&& cd / \
 	&& git clone --branch=master --single-branch https://github.com/gflags/gflags.git /gflags/local \
 	&& mkdir -p /gflags/local/alpine \
 	&& chmod o+w /usr/include \

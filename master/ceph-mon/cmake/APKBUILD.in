@@ -1,0 +1,79 @@
+# Contributor: Stefan Bischoff <stefan.bischoff@lw-rulez.de>
+# Maintainer: Stefan Bischoff <stefan.bischoff@lw-rulez.de>
+pkgname=cmake
+pkgver=@VERSION@
+pkgrel=@RPM_RELEASE@
+pkgdesc="CMake, the cross-platform, open-source build system."
+pkgusers="ceph"
+pkggroups="ceph"
+url="https://cmake.org/"
+arch="@ARCH@"
+license="OSI-approved BSD 3-clause License"
+options="!check"
+depends="rhash-libs cmake-base"
+makedepends="openssl-dev rhash-dev zlib-dev curl-dev expat-dev libarchive-dev jsoncpp-dev libuv-dev"
+# grep --quiet option required
+# util-linux uuidgen required
+
+source="@TARBALL_BASENAME@.tar.bz2"
+subpackages="
+	$pkgname-base:cmake_base
+	$pkgname-dev:cmake_dev
+	$pkgname-doc:cmake_doc
+"
+_ceph_uid=167
+_ceph_gid=167
+
+_prefix=/usr
+_bindir=$_prefix/bin
+_datadir=$_prefix/share
+_includedir=$_prefix/include
+_docdir=$_prefix/doc
+_libdir=$_prefix/lib
+
+builddir="$srcdir/@TARBALL_BASENAME@"
+
+build() {
+	cd "$builddir" \
+	&& ./bootstrap --prefix=/usr --system-libs --parallel={JOBS:-2} \
+	&& make -j${JOBS:-2} || return 1
+}
+
+package() {
+	cd "$builddir"
+	make DESTDIR=$pkgdir install || return 1
+	cd ..
+}
+
+cmake_doc()
+{
+	_pkg $_docdir cmake-3.16
+}
+
+cmake_dev()
+{
+	_pkg $_datadir/cmake-3.16 include/*
+}
+
+cmake_base()
+{
+	_pkg $_bindir cmake ctest cpack
+	_pkg $_datadir/cmake-3.16 Help
+	_pkg $_datadir/cmake-3.16 Modules
+	_pkg $_datadir/cmake-3.16 Templates
+	_pkg $_datadir/cmake-3.16 editors
+	_pkg $_datadir/aclocal cmake.m4
+	_pkg $_datadir/cmake-3.16 completions
+}
+
+_pkg()
+{
+	local path=$1
+	shift
+	local files=$@
+	mkdir -p $subpkgdir$path || exit 1
+	for _file in $files; do
+		mv $pkgdir$path/$_file $subpkgdir$path || exit 1
+	done
+}
+

@@ -12,7 +12,7 @@ license="GPLv2 and Apache 2.0"
 options="!check"
 # grep --quiet option required
 # util-linux uuidgen required
-makedepends="gflags libgflags gflags-dev"
+makedepends="gflags libgflags gflags-dev cmake"
 source="@TARBALL_BASENAME@.tar.bz2"
 subpackages="
 	$pkgname-dev:rocksdb_dev
