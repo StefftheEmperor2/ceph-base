@@ -179,4 +179,6 @@ RUN addgroup -g 1000 node \
 	&& cd / \
 	&& rm -rf /ceph \
 	&& apk add ceph \
-	&& apk del .build-deps
+	&& apk del .build-deps \
+	&& mkdir -p /var/run/ceph \
+	&& chown ceph:ceph /var/run/ceph

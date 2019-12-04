@@ -104,6 +104,8 @@ RUN addgroup -g 1000 node \
 		lz4-dev \ 
 		zstd-dev \
 		boost-dev \
+		py3-pip \
+		py2-pip \
 	&& mkdir -p /abuild \
 	&& cd /abuild \
 	&& openssl genrsa -out abuild.rsa 2048 \
@@ -211,4 +213,8 @@ RUN addgroup -g 1000 node \
 	&& cd /  \
 	&& rm -rf /ceph \
 	&& apk add ceph \
-	&& apk del .build-deps
+	&& pip3 install influxdb \
+	&& pip2 install influxdb \
+	&& apk del .build-deps \
+	&& mkdir -p /var/run/ceph \
+	&& chown ceph:ceph /var/run/ceph
