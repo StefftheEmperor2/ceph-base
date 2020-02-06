@@ -174,8 +174,8 @@ RUN addgroup -g 1000 node \
 	&& chmod u+x /ceph/local/make-apk \
 	&& chmod u+x /ceph/local/make-dist \
 	&& chown -R ceph:ceph /ceph/local \
-	&& cd /ceph/local \
-	&& su ceph - -c ./make-dist \
+	&& cd /ceph/local
+RUN cd /ceph/local && su ceph - -c ./make-dist \
 	&& su ceph - -c ./make-apk \
 	&& cd / \
 	&& rm -rf /ceph \
