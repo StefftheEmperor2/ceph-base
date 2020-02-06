@@ -47,23 +47,23 @@ package() {
 
 cmake_doc()
 {
-	_pkg $_docdir cmake-3.16
+	_pkg $_docdir cmake-3.17
 }
 
 cmake_dev()
 {
-	_pkg $_datadir/cmake-3.16 include/*
+	_pkg $_datadir/cmake-3.17 include/*
 }
 
 cmake_base()
 {
 	_pkg $_bindir cmake ctest cpack
-	_pkg $_datadir/cmake-3.16 Help
-	_pkg $_datadir/cmake-3.16 Modules
-	_pkg $_datadir/cmake-3.16 Templates
-	_pkg $_datadir/cmake-3.16 editors
+	_pkg $_datadir/cmake-3.17 Help
+	_pkg $_datadir/cmake-3.17 Modules
+	_pkg $_datadir/cmake-3.17 Templates
+	_pkg $_datadir/cmake-3.17 editors
 	_pkg $_datadir/aclocal cmake.m4
-	_pkg $_datadir/cmake-3.16 completions
+	_pkg $_datadir/cmake-3.17 completions
 }
 
 _pkg()
